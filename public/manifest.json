@@ -1,0 +1,25 @@
+{
+  "name": "Maa Vratam Kit - Sacred Pooja Collections",
+  "short_name": "Maa Vratam Kit",
+  "description": "Authentic Pooja Vratam Kits for spiritual worship and devotion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#FF6B35",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["shopping", "lifestyle", "religion"]
+}
