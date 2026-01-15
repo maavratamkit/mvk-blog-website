@@ -130,9 +130,9 @@ export async function fetcher<T>(
 }
 
 /**
- * Mock API base URL - In production, this would come from environment variables
+ * API base URL from environment variables
  */
-export const API_BASE_URL = 'https://mpc60b43be497742527d.free.beeceptor.com/api/v1';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://mpc60b43be497742527d.free.beeceptor.com/api/v1';
 
 /**
  * Helper function to build API URLs

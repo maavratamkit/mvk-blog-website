@@ -119,11 +119,11 @@ export async function fetchCategoryBySlug(slug: string): Promise<Category> {
   try {
     const categories = await fetchCategories();
     const category = categories.find(cat => cat.slug === slug);
-    
+
     if (!category) {
       throw new ApiException(`Category with slug "${slug}" not found.`, 404, 'NOT_FOUND');
     }
-    
+
     return category;
   } catch (error) {
     if (error instanceof ApiException) {
@@ -131,4 +131,20 @@ export async function fetchCategoryBySlug(slug: string): Promise<Category> {
     }
     throw new ApiException('Failed to fetch category details. Please try again.');
   }
+}
+
+/**
+ * Build a category map from categories array
+ * Maps category ID to category name and slug for quick lookup
+ * @param categories - Array of categories
+ * @returns CategoryMap object
+ */
+export function buildCategoryMap(categories: Category[]): Record<number, { title: string; slug: string }> {
+  return categories.reduce((map, category) => {
+    map[category.id] = {
+      title: category.title,
+      slug: category.slug || '',
+    };
+    return map;
+  }, {} as Record<number, { title: string; slug: string }>);
 }
