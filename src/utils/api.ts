@@ -132,7 +132,7 @@ export async function fetcher<T>(
 
 // Read API base URL from Vite env var (client-visible vars must start with VITE_).
 // Example: VITE_API_BASE_URL=http://127.0.0.1:3000/api/v1
-export const API_BASE_URL: string = (import.meta as any).env?.VITE_API_BASE_URL || 'https://mpc60b43be497742527d.free.beeceptor.com/api/v1';
+export const API_BASE_URL: string = (import.meta as any).env?.VITE_API_BASE_URL || 'http://127.0.0.1:3000/api/v1';
 
 /**
  * Helper function to build API URLs

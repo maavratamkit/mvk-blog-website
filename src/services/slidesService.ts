@@ -2,57 +2,90 @@
  * Slides Service - Handles all slideshow-related API operations
  */
 
-import { ApiException, fetchAllPages } from '../utils/api';
+import { fetcher, buildApiUrl, ApiException } from '../utils/api';
 
-export interface Slide {
-  id: number;
-  title: string;
-  subtitle: string;
-  image: string;
-  cta: string;
-  link: string;
-  isActive?: boolean;
-  order?: number;
+export interface Kit {
+  kit_id: number;
+  kit_name: string;
+  primary_image_url: string;
+  category_id: number;
+  price?: number;
+  description?: string;
   created_at?: string;
   updated_at?: string;
 }
 
+export interface Slide {
+  id: number;
+  title: string;
+  image: string;
+  cta: string;
+  link: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CategoryMap {
+  [categoryId: number]: {
+    title: string;
+    slug: string;
+  };
+}
+
+/**
+ * Transform kit data to slide format with category-based links
+ * @param kit - Kit data from API
+ * @param categoryMap - Map of category IDs to category info
+ * @returns Slide object
+ */
+function transformKitToSlide(kit: Kit, categoryMap: CategoryMap): Slide {
+  const categoryInfo = categoryMap[kit.category_id];
+
+  const link = categoryInfo?.slug
+    ? `/category/${categoryInfo.slug}`
+    : '/';
+  console.log('Generated link for slide:', link);
+  return {
+    id: kit.kit_id,
+    title: kit.kit_name,
+    image: kit.primary_image_url,
+    cta: 'Explore Now',
+    link,
+    created_at: kit.created_at,
+    updated_at: kit.updated_at,
+  };
+}
+
 /**
  * Fetch all active slides for the homepage slideshow
+ * @param categoryMap - Map of category IDs to category info for generating links
  * @returns Promise<Slide[]>
  */
-export async function fetchSlides(): Promise<Slide[]> {
+export async function fetchSlides(categoryMap: CategoryMap): Promise<Slide[]> {
   try {
-    // Use paginated API to fetch slideshow kits
-    const { items: pageItems } = await fetchAllPages<any>('/kits/slideshow', {
-      limit: 50,
-      sort: 'created_at',
-      order: 'desc',
+    if (!categoryMap || Object.keys(categoryMap).length === 0) {
+      throw new ApiException('Category data is required to fetch slides.');
+    }
+
+    const kits = await fetcher<Kit[]>(buildApiUrl('/kits/slideshow'), {
+      method: 'GET',
     });
 
-    const slides: Slide[] = (pageItems || []).map((item: any, index: number) => {
-      const primary = item.primary_image ?? {};
-      const getUrl = (img: any) => {
-        if (!img) return '';
-        if (typeof img === 'string') return img;
-        return img.url || img.path || img.src || img.image_url || '';
-      };
+    if (!Array.isArray(kits)) {
+      throw new ApiException('Invalid response format from slideshow API.');
+    }
 
-      const image = getUrl(primary) || '';
+    if (kits.length === 0) {
+      return [];
+    }
 
-      return {
-        id: item.kit_id,
-        title: item.kit_name || '',
-        subtitle: item.description || '',
-        image,
-        cta: 'Explore Now',
-        link: `/product/${item.kit_id}`,
-        isActive: Boolean(item.is_on_slideshow),
-        order: index + 1,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-      } as Slide;
-    });
+    const slides = kits.map(kit => {
+      if (!kit.kit_id || !kit.kit_name || !kit.primary_image_url || !kit.category_id) {
+        console.warn('Skipping kit with missing required fields:', kit);
+        return null;
+      }
+      return transformKitToSlide(kit, categoryMap);
+    }).filter((slide): slide is Slide => slide !== null);
 
     return slides;
 
@@ -67,17 +100,18 @@ export async function fetchSlides(): Promise<Slide[]> {
 /**
  * Fetch a single slide by ID
  * @param slideId - The slide ID
+ * @param categoryMap - Map of category IDs to category info
  * @returns Promise<Slide>
  */
-export async function fetchSlideById(slideId: number): Promise<Slide> {
+export async function fetchSlideById(slideId: number, categoryMap: CategoryMap): Promise<Slide> {
   try {
-    const allSlides = await fetchSlides();
+    const allSlides = await fetchSlides(categoryMap);
     const slide = allSlides.find(s => s.id === slideId);
-    
+
     if (!slide) {
       throw new ApiException(`Slide with ID ${slideId} not found.`, 404, 'NOT_FOUND');
     }
-    
+
     return slide;
   } catch (error) {
     if (error instanceof ApiException) {
