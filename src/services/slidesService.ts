@@ -33,24 +33,17 @@ export interface CategoryMap {
 }
 
 /**
- * Transform kit data to slide format with category-based links
+ * Transform kit data to slide format with product page links
  * @param kit - Kit data from API
- * @param categoryMap - Map of category IDs to category info
  * @returns Slide object
  */
-function transformKitToSlide(kit: Kit, categoryMap: CategoryMap): Slide {
-  const categoryInfo = categoryMap[kit.category_id];
-
-  const link = categoryInfo?.slug
-    ? `/category/${categoryInfo.slug}`
-    : '/';
-  console.log('Generated link for slide:', link);
+function transformKitToSlide(kit: Kit): Slide {
   return {
     id: kit.kit_id,
     title: kit.kit_name,
     image: kit.primary_image_url,
     cta: 'Explore Now',
-    link,
+    link: `/product/${kit.kit_id}`,
     created_at: kit.created_at,
     updated_at: kit.updated_at,
   };
@@ -58,15 +51,10 @@ function transformKitToSlide(kit: Kit, categoryMap: CategoryMap): Slide {
 
 /**
  * Fetch all active slides for the homepage slideshow
- * @param categoryMap - Map of category IDs to category info for generating links
  * @returns Promise<Slide[]>
  */
-export async function fetchSlides(categoryMap: CategoryMap): Promise<Slide[]> {
+export async function fetchSlides(): Promise<Slide[]> {
   try {
-    if (!categoryMap || Object.keys(categoryMap).length === 0) {
-      throw new ApiException('Category data is required to fetch slides.');
-    }
-
     const kits = await fetcher<Kit[]>(buildApiUrl('/kits/slideshow'), {
       method: 'GET',
     });
@@ -84,7 +72,7 @@ export async function fetchSlides(categoryMap: CategoryMap): Promise<Slide[]> {
         console.warn('Skipping kit with missing required fields:', kit);
         return null;
       }
-      return transformKitToSlide(kit, categoryMap);
+      return transformKitToSlide(kit);
     }).filter((slide): slide is Slide => slide !== null);
 
     return slides;
@@ -100,12 +88,11 @@ export async function fetchSlides(categoryMap: CategoryMap): Promise<Slide[]> {
 /**
  * Fetch a single slide by ID
  * @param slideId - The slide ID
- * @param categoryMap - Map of category IDs to category info
  * @returns Promise<Slide>
  */
-export async function fetchSlideById(slideId: number, categoryMap: CategoryMap): Promise<Slide> {
+export async function fetchSlideById(slideId: number): Promise<Slide> {
   try {
-    const allSlides = await fetchSlides(categoryMap);
+    const allSlides = await fetchSlides();
     const slide = allSlides.find(s => s.id === slideId);
 
     if (!slide) {
