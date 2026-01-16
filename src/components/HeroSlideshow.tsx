@@ -113,15 +113,15 @@ const HeroSlideshow: React.FC = () => {
             />
             <div className="absolute inset-0 bg-black bg-opacity-40">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full relative">
-                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 max-w-lg text-white">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-8 leading-tight">
+                <div className="absolute left-4 sm:left-6 lg:left-12 top-1/2 transform -translate-y-1/2 max-w-lg text-white">
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-8 leading-tight drop-shadow-lg">
                     {slide.title}
                   </h2>
                 </div>
-                <div className="absolute left-0 bottom-24 md:bottom-32">
+                <div className="absolute left-4 sm:left-6 lg:left-12 bottom-24 md:bottom-32">
                   <Link
                     to={slide.link}
-                    className="inline-block bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-3 rounded-full font-semibold text-lg hover:from-orange-600 hover:to-red-700 transform hover:scale-105 transition-all duration-300 shadow-lg"
+                    className="inline-block bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-3 rounded-full font-semibold text-lg hover:from-orange-600 hover:to-red-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                   >
                     {slide.cta}
                   </Link>
