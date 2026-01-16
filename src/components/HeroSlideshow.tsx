@@ -1,38 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSlides } from '../hooks/useSlides';
 
 const HeroSlideshow: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   // Use React Query hook for fetching slides
-  const { 
-    data: slides = [], 
-    isLoading: loading, 
-    error, 
-    refetch: handleRetry 
+  const {
+    data: slides = [],
+    isLoading: loading,
+    error,
+    refetch: handleRetry
   } = useSlides();
 
-  useEffect(() => {
-    if (slides.length === 0) return;
-    
-    const timer = setInterval(() => {
+  const startTimer = useCallback(() => {
+    if (slides.length <= 1) return;
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    timerRef.current = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
-    return () => clearInterval(timer);
   }, [slides.length]);
+
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [startTimer]);
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
+    startTimer();
   };
 
   const goToPrevious = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    startTimer();
   };
 
   const goToNext = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
+    startTimer();
   };
 
   // Show loading state
