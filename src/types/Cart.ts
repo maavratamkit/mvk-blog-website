@@ -6,6 +6,7 @@ export interface CartItem {
   quantity: number;
   stock: number;
   slug: string;
+  max_quantity?: number;
 }
 
 export interface Cart {

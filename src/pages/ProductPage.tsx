@@ -17,7 +17,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
   const { productId } = useParams<{ productId: string }>();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [addingToCart, setAddingToCart] = useState(false);
-  const { addToCart, isInCart, getItemQuantity, updateQuantity } = useCart();
+  const { addToCart, isInCart, getItemQuantity, updateQuantity, removeFromCart } = useCart();
   const navigate = useNavigate();
 
   const {
@@ -100,6 +100,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
       image_url: product.images[0],
       stock: product.stock || 100,
       slug: product.category,
+      max_quantity: product.max_quantity || 10,
     });
 
     setTimeout(() => {
@@ -117,6 +118,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
       image_url: product.images[0],
       stock: product.stock || 100,
       slug: product.category,
+      max_quantity: product.max_quantity || 10,
     });
 
     navigate('/checkout');
@@ -126,9 +128,9 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
     if (!product) return;
     const productId = product.id.toString();
     const currentQuantity = getItemQuantity(productId);
-    const stock = product.stock || 100;
+    const maxAllowed = Math.min(product.stock || 100, product.max_quantity || 10);
 
-    if (currentQuantity < stock) {
+    if (currentQuantity < maxAllowed) {
       updateQuantity(productId, currentQuantity + 1);
     }
   };
@@ -138,7 +140,9 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
     const productId = product.id.toString();
     const currentQuantity = getItemQuantity(productId);
 
-    if (currentQuantity > 1) {
+    if (currentQuantity === 1) {
+      removeFromCart(productId);
+    } else if (currentQuantity > 1) {
       updateQuantity(productId, currentQuantity - 1);
     }
   };
@@ -243,8 +247,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
                       <div className="flex items-center justify-center space-x-4 py-4 px-6 rounded-xl bg-white border-2 border-orange-600 shadow-lg">
                         <button
                           onClick={handleDecrement}
-                          className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={getItemQuantity(product.id.toString()) <= 1}
+                          className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
                         >
                           <Minus className="w-4 h-4 text-gray-700" />
                         </button>
@@ -256,7 +259,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
                         <button
                           onClick={handleIncrement}
                           className="w-10 h-10 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={getItemQuantity(product.id.toString()) >= (product.stock || 100)}
+                          disabled={getItemQuantity(product.id.toString()) >= Math.min(product.stock || 100, product.max_quantity || 10)}
                         >
                           <Plus className="w-4 h-4 text-white" />
                         </button>

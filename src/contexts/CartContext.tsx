@@ -58,11 +58,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addToCart = (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
     setCartItems((prev) => {
       const existingItem = prev.find((i) => i.id === item.id);
+      const maxAllowed = Math.min(item.stock, item.max_quantity || 10);
 
       if (existingItem) {
         const newQuantity = existingItem.quantity + quantity;
-        if (newQuantity > item.stock) {
-          alert(`Only ${item.stock} items available in stock`);
+        if (newQuantity > maxAllowed) {
+          alert(`Maximum ${maxAllowed} items allowed per product`);
           return prev;
         }
         return prev.map((i) =>
@@ -70,8 +71,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         );
       }
 
-      if (quantity > item.stock) {
-        alert(`Only ${item.stock} items available in stock`);
+      if (quantity > maxAllowed) {
+        alert(`Maximum ${maxAllowed} items allowed per product`);
         return prev;
       }
 
@@ -92,8 +93,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCartItems((prev) =>
       prev.map((item) => {
         if (item.id === itemId) {
-          if (quantity > item.stock) {
-            alert(`Only ${item.stock} items available in stock`);
+          const maxAllowed = Math.min(item.stock, item.max_quantity || 10);
+          if (quantity > maxAllowed) {
+            alert(`Maximum ${maxAllowed} items allowed per product`);
             return item;
           }
           return { ...item, quantity };

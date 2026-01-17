@@ -131,6 +131,8 @@ export async function fetchProductsByCategory(categoryParam: string | number): P
         kitIncludes: extractKitIncludes(item.kit_items ?? item.kit_includes ?? item.includes ?? []),
         significance: item.significance || '',
         availability_status: item.availability_status || 'IN_STOCK',
+        stock: typeof item.stock === 'number' ? item.stock : 100,
+        max_quantity: typeof item.max_quantity === 'number' ? item.max_quantity : 10,
       } as Product;
     });
 
@@ -204,6 +206,8 @@ export async function fetchProductById(productId: number): Promise<Product> {
       kitIncludes: extractKitIncludes(kit.kit_items ?? kit.kit_includes ?? kit.includes ?? []),
       significance: kit.significance || '',
       availability_status: kit.availability_status || 'IN_STOCK',
+      stock: typeof kit.stock === 'number' ? kit.stock : 100,
+      max_quantity: typeof kit.max_quantity === 'number' ? kit.max_quantity : 10,
     };
 
     return product;
