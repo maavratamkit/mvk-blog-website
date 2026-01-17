@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, ShoppingCart } from 'lucide-react';
 import { slugify } from '../utils/slugify';
 import { Category } from '../types/Category';
+import { useCart } from '../contexts/CartContext';
 
 interface HeaderProps {
   categories: Category[];
@@ -11,6 +12,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ categories }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isKitsDropdownOpen, setIsKitsDropdownOpen] = useState(false);
+  const { cart } = useCart();
 
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
@@ -64,7 +66,17 @@ const Header: React.FC<HeaderProps> = ({ categories }) => {
             <Link to="/about" className="text-gray-700 hover:text-orange-600 font-medium transition-colors">About Us</Link>
           </nav>
 
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            {/* Cart Icon */}
+            <Link to="/cart" className="relative p-2 text-gray-700 hover:text-orange-600 transition-colors">
+              <ShoppingCart className="w-6 h-6" />
+              {cart.itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cart.itemCount > 99 ? '99+' : cart.itemCount}
+                </span>
+              )}
+            </Link>
+
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
