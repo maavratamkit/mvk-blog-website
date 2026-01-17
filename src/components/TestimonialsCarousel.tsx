@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Quote, ChevronLeft, ChevronRight, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Quote, ChevronLeft, ChevronRight, Loader2, AlertCircle, RefreshCw, MapPin, User } from 'lucide-react';
 import { useTestimonials } from '../hooks/useTestimonials';
 
 const TestimonialsCarousel: React.FC = () => {
@@ -42,17 +42,6 @@ const TestimonialsCarousel: React.FC = () => {
     setCurrentIndex(index);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
-  };
-
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`w-5 h-5 ${
-          i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-        }`}
-      />
-    ));
   };
 
   // Show loading state
@@ -148,50 +137,64 @@ const TestimonialsCarousel: React.FC = () => {
           {/* Main Testimonial Card */}
           <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 mx-auto max-w-4xl relative overflow-hidden">
             {/* Decorative Quote */}
-            <Quote className="absolute top-8 right-8 w-16 h-16 text-orange-200 opacity-50" />
-            
+            <div className="absolute top-6 left-6 opacity-10">
+              <Quote className="w-20 h-20 text-orange-600" />
+            </div>
+            <div className="absolute bottom-6 right-6 opacity-10 rotate-180">
+              <Quote className="w-20 h-20 text-red-600" />
+            </div>
+
             <div className="relative z-10">
-              <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
-                {/* User Image */}
-                <div className="relative">
-                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden ring-4 ring-orange-200 ring-offset-4">
-                    <img
-                      src={testimonials[currentIndex].image}
-                      alt={testimonials[currentIndex].name}
-                      className="w-full h-full object-cover"
-                    />
+              <div className="flex flex-col items-center space-y-8">
+                {/* User Image with Decorative Frame */}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                  <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden ring-4 ring-white shadow-xl">
+                    {testimonials[currentIndex].customer_img_url ? (
+                      <img
+                        src={testimonials[currentIndex].customer_img_url}
+                        alt={testimonials[currentIndex].customer_name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div className={`${testimonials[currentIndex].customer_img_url ? 'hidden' : ''} w-full h-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center`}>
+                      <User className="w-16 h-16 text-orange-400" />
+                    </div>
                   </div>
-                  <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full p-2">
+                  <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full px-4 py-1 shadow-lg">
                     <Quote className="w-4 h-4 text-white" />
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 text-center md:text-left">
-                  <div className="flex justify-center md:justify-start mb-4">
-                    {renderStars(testimonials[currentIndex].rating)}
-                  </div>
-                  
-                  <blockquote className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6 italic">
-                    "{testimonials[currentIndex].testimonial}"
+                <div className="flex-1 text-center max-w-3xl">
+                  <blockquote className="text-lg md:text-2xl text-gray-700 leading-relaxed mb-8 font-serif italic relative">
+                    <span className="text-orange-500 text-4xl absolute -left-4 -top-2">"</span>
+                    {testimonials[currentIndex].testimonial}
+                    <span className="text-orange-500 text-4xl absolute -bottom-6">"</span>
                   </blockquote>
-                  
-                  <div>
-                    <h4 className="text-xl font-bold text-gray-800 mb-1">
-                      {testimonials[currentIndex].name}
+
+                  <div className="pt-6 border-t-2 border-orange-100">
+                    <h4 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-3">
+                      {testimonials[currentIndex].customer_name}
                     </h4>
-                    <p className="text-orange-600 font-medium">
-                      {testimonials[currentIndex].location}
-                    </p>
+                    <div className="flex items-center justify-center space-x-2 text-gray-600">
+                      <MapPin className="w-5 h-5 text-orange-500" />
+                      <p className="text-lg font-medium">
+                        {testimonials[currentIndex].customer_location}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Gradient Border */}
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 rounded-3xl p-1 -z-10">
-              <div className="bg-white rounded-3xl h-full w-full"></div>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-red-400 to-orange-400 rounded-3xl opacity-20 blur-xl -z-10"></div>
           </div>
 
           {/* Navigation Arrows */}

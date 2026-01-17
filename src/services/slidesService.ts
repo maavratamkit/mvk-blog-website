@@ -5,9 +5,9 @@
 import { fetcher, buildApiUrl, ApiException } from '../utils/api';
 
 export interface Kit {
-  kit_id: number;
-  kit_name: string;
-  primary_image_url: string;
+  id: number;
+  title: string;
+  image_url: string;
   category_id: number;
   price?: number;
   description?: string;
@@ -39,11 +39,11 @@ export interface CategoryMap {
  */
 function transformKitToSlide(kit: Kit): Slide {
   return {
-    id: kit.kit_id,
-    title: kit.kit_name,
-    image: kit.primary_image_url,
+    id: kit.id,
+    title: kit.title,
+    image: kit.image_url,
     cta: 'Explore Now',
-    link: `/product/${kit.kit_id}`,
+    link: `/product/${kit.id}`,
     created_at: kit.created_at,
     updated_at: kit.updated_at,
   };
@@ -68,7 +68,7 @@ export async function fetchSlides(): Promise<Slide[]> {
     }
 
     const slides = kits.map(kit => {
-      if (!kit.kit_id || !kit.kit_name || !kit.primary_image_url || !kit.category_id) {
+      if (!kit.id || !kit.title || !kit.image_url || !kit.category_id) {
         console.warn('Skipping kit with missing required fields:', kit);
         return null;
       }
