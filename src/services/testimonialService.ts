@@ -23,7 +23,7 @@ interface ApiResponse {
  */
 export async function fetchTestimonials(): Promise<Testimonial[]> {
   try {
-    const response = await fetcher<ApiResponse>(buildApiUrl('/api/v1/testimonials'), {
+    const response = await fetcher<ApiResponse>(buildApiUrl('/testimonials'), {
       method: 'GET',
     });
 
@@ -44,7 +44,7 @@ export async function fetchTestimonials(): Promise<Testimonial[]> {
 export async function fetchTestimonialById(testimonialId: number): Promise<Testimonial> {
   try {
     const response = await fetcher<{ data: Testimonial }>(
-      buildApiUrl(`/api/v1/testimonials/${testimonialId}`),
+      buildApiUrl(`/testimonials/${testimonialId}`),
       {
         method: 'GET',
       }
