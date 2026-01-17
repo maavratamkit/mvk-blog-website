@@ -13,21 +13,17 @@ export interface Testimonial {
   created_at: string;
 }
 
-interface ApiResponse {
-  data: Testimonial[];
-}
-
 /**
  * Fetch all active testimonials
  * @returns Promise<Testimonial[]>
  */
 export async function fetchTestimonials(): Promise<Testimonial[]> {
   try {
-    const response = await fetcher<ApiResponse>(buildApiUrl('/api/v1/testimonials'), {
+    const testimonials = await fetcher<Testimonial[]>(buildApiUrl('/api/v1/testimonials'), {
       method: 'GET',
     });
 
-    return response.data;
+    return testimonials;
   } catch (error) {
     if (error instanceof ApiException) {
       throw error;
@@ -43,14 +39,14 @@ export async function fetchTestimonials(): Promise<Testimonial[]> {
  */
 export async function fetchTestimonialById(testimonialId: number): Promise<Testimonial> {
   try {
-    const response = await fetcher<{ data: Testimonial }>(
+    const testimonial = await fetcher<Testimonial>(
       buildApiUrl(`/api/v1/testimonials/${testimonialId}`),
       {
         method: 'GET',
       }
     );
 
-    return response.data;
+    return testimonial;
   } catch (error) {
     if (error instanceof ApiException) {
       throw error;
