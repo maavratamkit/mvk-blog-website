@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Zap, Shield, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Zap, Shield, Loader2, AlertCircle, RefreshCw, Plus, Minus } from 'lucide-react';
 import { unslugify } from '../utils/slugify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -17,7 +17,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
   const { productId } = useParams<{ productId: string }>();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [addingToCart, setAddingToCart] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart, isInCart, getItemQuantity, updateQuantity } = useCart();
   const navigate = useNavigate();
 
   const {
@@ -122,6 +122,27 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
     navigate('/checkout');
   };
 
+  const handleIncrement = () => {
+    if (!product) return;
+    const productId = product.id.toString();
+    const currentQuantity = getItemQuantity(productId);
+    const stock = product.stock || 100;
+
+    if (currentQuantity < stock) {
+      updateQuantity(productId, currentQuantity + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (!product) return;
+    const productId = product.id.toString();
+    const currentQuantity = getItemQuantity(productId);
+
+    if (currentQuantity > 1) {
+      updateQuantity(productId, currentQuantity - 1);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Header categories={categories} />
@@ -218,14 +239,38 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
                   </button>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button
-                      onClick={handleAddToCart}
-                      disabled={addingToCart}
-                      className="py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg bg-white text-orange-600 border-2 border-orange-600 hover:bg-orange-50 transform hover:scale-105 hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <ShoppingCart className="w-5 h-5" />
-                      <span>{addingToCart ? 'Added!' : 'Add to Cart'}</span>
-                    </button>
+                    {isInCart(product.id.toString()) ? (
+                      <div className="flex items-center justify-center space-x-4 py-4 px-6 rounded-xl bg-white border-2 border-orange-600 shadow-lg">
+                        <button
+                          onClick={handleDecrement}
+                          className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={getItemQuantity(product.id.toString()) <= 1}
+                        >
+                          <Minus className="w-4 h-4 text-gray-700" />
+                        </button>
+
+                        <span className="text-xl font-semibold text-gray-800 min-w-[3rem] text-center">
+                          {getItemQuantity(product.id.toString())}
+                        </span>
+
+                        <button
+                          onClick={handleIncrement}
+                          className="w-10 h-10 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={getItemQuantity(product.id.toString()) >= (product.stock || 100)}
+                        >
+                          <Plus className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleAddToCart}
+                        disabled={addingToCart}
+                        className="py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg bg-white text-orange-600 border-2 border-orange-600 hover:bg-orange-50 transform hover:scale-105 hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ShoppingCart className="w-5 h-5" />
+                        <span>{addingToCart ? 'Added!' : 'Add to Cart'}</span>
+                      </button>
+                    )}
 
                     <button
                       onClick={handleBuyNow}
@@ -239,6 +284,8 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
                 <p className="text-sm text-gray-600 text-center">
                   {isOutOfStock
                     ? 'This product is currently unavailable. Please check back later.'
+                    : isInCart(product.id.toString())
+                    ? 'Adjust quantity or proceed to checkout'
                     : 'Add to cart or buy instantly with just one click'
                   }
                 </p>
