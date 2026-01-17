@@ -33,23 +33,19 @@ export interface CategoryMap {
 }
 
 /**
- * Transform kit data to slide format with category-based links
+ * Transform kit data to slide format with product-based links
  * @param kit - Kit data from API
  * @param categoryMap - Map of category IDs to category info
  * @returns Slide object
  */
 function transformKitToSlide(kit: Kit, categoryMap: CategoryMap): Slide {
-  const categoryInfo = categoryMap[kit.category_id];
-
-  const link = categoryInfo?.slug
-    ? `/category/${categoryInfo.slug}`
-    : '/';
+  const link = `/product/${kit.kit_id}`;
   console.log('Generated link for slide:', link);
   return {
     id: kit.kit_id,
     title: kit.kit_name,
     image: kit.primary_image_url,
-    cta: 'Explore Now',
+    cta: 'Shop Now',
     link,
     created_at: kit.created_at,
     updated_at: kit.updated_at,
