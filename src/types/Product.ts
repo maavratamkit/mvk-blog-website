@@ -9,6 +9,7 @@ export interface Product {
   category: string;
   kitIncludes: string[];
   significance: string;
+  availability_status?: string;
 }
 
 export interface CartItem extends Product {

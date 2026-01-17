@@ -84,7 +84,11 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
     );
   }
 
+  const isOutOfStock = product.availability_status === 'OUT_OF_STOCK';
+
   const handleOrderOnWhatsApp = () => {
+    if (isOutOfStock) return;
+
     const message = `Hi! I'm interested in ordering the ${product.name} (₹${product.price.toLocaleString()}). Please provide more details about availability and delivery.`;
     const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -179,13 +183,21 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
               <div className="space-y-4">
                 <button
                   onClick={handleOrderOnWhatsApp}
-                  className="w-full bg-green-600 text-white py-4 px-8 rounded-xl font-semibold text-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-3"
+                  disabled={isOutOfStock}
+                  className={`w-full py-4 px-8 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg flex items-center justify-center space-x-3 ${
+                    isOutOfStock
+                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                      : 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105 hover:shadow-xl'
+                  }`}
                 >
                   <MessageSquare className="w-6 h-6" />
-                  <span>Order on WhatsApp</span>
+                  <span>{isOutOfStock ? 'Currently Out of Stock' : 'Order on WhatsApp'}</span>
                 </button>
                 <p className="text-sm text-gray-600 text-center">
-                  Click to chat with us on WhatsApp for instant ordering and support
+                  {isOutOfStock
+                    ? 'This product is currently unavailable. Please check back later.'
+                    : 'Click to chat with us on WhatsApp for instant ordering and support'
+                  }
                 </p>
               </div>
 

@@ -130,6 +130,7 @@ export async function fetchProductsByCategory(categoryParam: string | number): P
         category: categorySlug ?? String(item.category_id ?? ''),
         kitIncludes: extractKitIncludes(item.kit_items ?? item.kit_includes ?? item.includes ?? []),
         significance: item.significance || '',
+        availability_status: item.availability_status || 'IN_STOCK',
       } as Product;
     });
 
@@ -202,6 +203,7 @@ export async function fetchProductById(productId: number): Promise<Product> {
       category: categorySlug ?? String(kit.category_id ?? ''),
       kitIncludes: extractKitIncludes(kit.kit_items ?? kit.kit_includes ?? kit.includes ?? []),
       significance: kit.significance || '',
+      availability_status: kit.availability_status || 'IN_STOCK',
     };
 
     return product;
