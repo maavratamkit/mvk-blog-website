@@ -77,7 +77,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ categories }) => {
     }
 
     const message = formatWhatsAppMessage(cart, formData);
-    const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/918425070457?text=${encodeURIComponent(message)}`;
 
     window.open(whatsappUrl, '_blank');
 
