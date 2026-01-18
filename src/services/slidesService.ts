@@ -4,77 +4,86 @@
 
 import { fetcher, buildApiUrl, ApiException } from '../utils/api';
 
-export interface Slide {
-  id: number;
-  title: string;
-  subtitle: string;
-  image: string;
-  cta: string;
-  link: string;
-  isActive?: boolean;
-  order?: number;
+export interface Kit {
+  kit_id: number;
+  kit_name: string;
+  primary_image_url: string;
+  category_id: number;
+  price?: number;
+  description?: string;
   created_at?: string;
   updated_at?: string;
 }
 
+export interface Slide {
+  id: number;
+  title: string;
+  image: string;
+  cta: string;
+  link: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CategoryMap {
+  [categoryId: number]: {
+    title: string;
+    slug: string;
+  };
+}
+
+/**
+ * Transform kit data to slide format with product-based links
+ * @param kit - Kit data from API
+ * @param categoryMap - Map of category IDs to category info
+ * @returns Slide object
+ */
+function transformKitToSlide(kit: Kit, categoryMap: CategoryMap): Slide {
+  const link = `/product/${kit.kit_id}`;
+  console.log('Generated link for slide:', link);
+  return {
+    id: kit.kit_id,
+    title: kit.kit_name,
+    image: kit.primary_image_url,
+    cta: 'Shop Now',
+    link,
+    created_at: kit.created_at,
+    updated_at: kit.updated_at,
+  };
+}
+
 /**
  * Fetch all active slides for the homepage slideshow
+ * @param categoryMap - Map of category IDs to category info for generating links
  * @returns Promise<Slide[]>
  */
-export async function fetchSlides(): Promise<Slide[]> {
+export async function fetchSlides(categoryMap: CategoryMap): Promise<Slide[]> {
   try {
-    // Mock API response with slideshow data
-    const mockApiResponse: Slide[] = [
-      {
-        id: 1,
-        title: "New Arrival: Shree Sai Baba Vratam Kit",
-        subtitle: "Complete kit with all essentials for your sacred vratam",
-        image: "https://i.pinimg.com/736x/2b/a9/86/2ba986468a02d1c4ec3ebec447e60018.jpg",
-        cta: "Shop Now",
-        link: "/product/1",
-        isActive: true,
-        order: 1
-      },
-      {
-        id: 2,
-        title: "Popular: Shree Swami Samarth Collection",
-        subtitle: "Premium quality items blessed for your spiritual journey",
-        image: "https://i.pinimg.com/474x/fa/20/e6/fa20e6d764b98789601e7c3b71b8e595.jpg",
-        cta: "Explore Collection",
-        link: "/category/shree-swami-samarth-kits",
-        isActive: true,
-        order: 2
-      },
-      {
-        id: 3,
-        title: "Divine Dattatreya Vratam Essentials",
-        subtitle: "Traditional items handpicked for authentic worship experience",
-        image: "https://wallpapers.com/images/hd/lord-dattatreya-scenic-painting-art-4wzyy5nybzfb06he.jpg",
-        cta: "View Details",
-        link: "/category/shree-dattatreya-vratam",
-        isActive: true,
-        order: 3
-      },
-      {
-        id: 4,
-        title: "Festival Special: Ganesha Celebration Kit",
-        subtitle: "Everything you need for auspicious Ganesha worship",
-        image: "https://i.pinimg.com/474x/eb/62/44/eb624482fe29be1b3d4bc1c41181d6ba.jpg",
-        cta: "Get Started",
-        link: "/category/shree-ganesha-kits",
-        isActive: true,
-        order: 4
+    if (!categoryMap || Object.keys(categoryMap).length === 0) {
+      throw new ApiException('Category data is required to fetch slides.');
+    }
+
+    const kits = await fetcher<Kit[]>(buildApiUrl('/kits/slideshow'), {
+      method: 'GET',
+    });
+
+    if (!Array.isArray(kits)) {
+      throw new ApiException('Invalid response format from slideshow API.');
+    }
+
+    if (kits.length === 0) {
+      return [];
+    }
+
+    const slides = kits.map(kit => {
+      if (!kit.kit_id || !kit.kit_name || !kit.primary_image_url || !kit.category_id) {
+        console.warn('Skipping kit with missing required fields:', kit);
+        return null;
       }
-    ];
+      return transformKitToSlide(kit, categoryMap);
+    }).filter((slide): slide is Slide => slide !== null);
 
-    // In production, this would make an actual API call
-    // return await fetcher<Slide[]>(buildApiUrl('/slides'), {
-    //   method: 'GET',
-    // });
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 600));
-    return mockApiResponse;
+    return slides;
 
   } catch (error) {
     if (error instanceof ApiException) {
@@ -87,17 +96,18 @@ export async function fetchSlides(): Promise<Slide[]> {
 /**
  * Fetch a single slide by ID
  * @param slideId - The slide ID
+ * @param categoryMap - Map of category IDs to category info
  * @returns Promise<Slide>
  */
-export async function fetchSlideById(slideId: number): Promise<Slide> {
+export async function fetchSlideById(slideId: number, categoryMap: CategoryMap): Promise<Slide> {
   try {
-    const allSlides = await fetchSlides();
+    const allSlides = await fetchSlides(categoryMap);
     const slide = allSlides.find(s => s.id === slideId);
-    
+
     if (!slide) {
       throw new ApiException(`Slide with ID ${slideId} not found.`, 404, 'NOT_FOUND');
     }
-    
+
     return slide;
   } catch (error) {
     if (error instanceof ApiException) {

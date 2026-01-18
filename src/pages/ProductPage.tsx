@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MessageSquare, Shield, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, ShoppingCart, Zap, Shield, Loader2, AlertCircle, RefreshCw, Plus, Minus } from 'lucide-react';
 import { unslugify } from '../utils/slugify';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Product } from '../types/Product';
 import { Category } from '../types/Category';
 import { useProduct } from '../hooks/useProducts';
+import { useCart } from '../contexts/CartContext';
 
 interface ProductPageProps {
   categories: Category[];
@@ -15,13 +16,15 @@ interface ProductPageProps {
 const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
   const { productId } = useParams<{ productId: string }>();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const { addToCart, isInCart, getItemQuantity, updateQuantity, removeFromCart } = useCart();
+  const navigate = useNavigate();
 
-  // Use React Query hook for fetching individual product
-  const { 
-    data: product, 
-    isLoading: loading, 
-    error, 
-    refetch: handleRetry 
+  const {
+    data: product,
+    isLoading: loading,
+    error,
+    refetch: handleRetry
   } = useProduct(parseInt(productId || '0'));
 
   // Show loading state
@@ -84,10 +87,64 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
     );
   }
 
-  const handleOrderOnWhatsApp = () => {
-    const message = `Hi! I'm interested in ordering the ${product.name} (₹${product.price.toLocaleString()}). Please provide more details about availability and delivery.`;
-    const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+  const isOutOfStock = product.availability_status === 'OUT_OF_STOCK';
+
+  const handleAddToCart = () => {
+    if (isOutOfStock) return;
+
+    setAddingToCart(true);
+    addToCart({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image_url: product.images[0],
+      stock: product.stock || 100,
+      slug: product.category,
+      max_quantity: product.max_quantity || 10,
+    });
+
+    setTimeout(() => {
+      setAddingToCart(false);
+    }, 500);
+  };
+
+  const handleBuyNow = () => {
+    if (isOutOfStock) return;
+
+    addToCart({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image_url: product.images[0],
+      stock: product.stock || 100,
+      slug: product.category,
+      max_quantity: product.max_quantity || 10,
+    });
+
+    navigate('/checkout');
+  };
+
+  const handleIncrement = () => {
+    if (!product) return;
+    const productId = product.id.toString();
+    const currentQuantity = getItemQuantity(productId);
+    const maxAllowed = Math.min(product.stock || 100, product.max_quantity || 10);
+
+    if (currentQuantity < maxAllowed) {
+      updateQuantity(productId, currentQuantity + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (!product) return;
+    const productId = product.id.toString();
+    const currentQuantity = getItemQuantity(productId);
+
+    if (currentQuantity === 1) {
+      removeFromCart(productId);
+    } else if (currentQuantity > 1) {
+      updateQuantity(productId, currentQuantity - 1);
+    }
   };
 
   return (
@@ -126,6 +183,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
                   src={product.images[selectedImageIndex]}
                   alt={product.name}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  style={{ objectPosition: 'center 40%' }}
                 />
               </div>
 
@@ -145,6 +203,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
                       src={image}
                       alt={`${product.name} view ${index + 1}`}
                       className="w-full h-full object-cover"
+                      style={{ objectPosition: 'center 40%' }}
                     />
                   </button>
                 ))}
@@ -175,17 +234,65 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
                 </p>
               </div>
 
-              {/* WhatsApp Order Button */}
+              {/* Action Buttons */}
               <div className="space-y-4">
-                <button
-                  onClick={handleOrderOnWhatsApp}
-                  className="w-full bg-green-600 text-white py-4 px-8 rounded-xl font-semibold text-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-3"
-                >
-                  <MessageSquare className="w-6 h-6" />
-                  <span>Order on WhatsApp</span>
-                </button>
+                {isOutOfStock ? (
+                  <button
+                    disabled
+                    className="w-full py-4 px-8 rounded-xl font-semibold text-lg bg-gray-400 text-gray-200 cursor-not-allowed shadow-lg"
+                  >
+                    Out of Stock
+                  </button>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {isInCart(product.id.toString()) ? (
+                      <div className="flex items-center justify-center space-x-4 py-4 px-6 rounded-xl bg-white border-2 border-orange-600 shadow-lg">
+                        <button
+                          onClick={handleDecrement}
+                          className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                        >
+                          <Minus className="w-4 h-4 text-gray-700" />
+                        </button>
+
+                        <span className="text-xl font-semibold text-gray-800 min-w-[3rem] text-center">
+                          {getItemQuantity(product.id.toString())}
+                        </span>
+
+                        <button
+                          onClick={handleIncrement}
+                          className="w-10 h-10 rounded-full bg-orange-500 hover:bg-orange-600 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={getItemQuantity(product.id.toString()) >= Math.min(product.stock || 100, product.max_quantity || 10)}
+                        >
+                          <Plus className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleAddToCart}
+                        disabled={addingToCart}
+                        className="py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg bg-white text-orange-600 border-2 border-orange-600 hover:bg-orange-50 transform hover:scale-105 hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ShoppingCart className="w-5 h-5" />
+                        <span>{addingToCart ? 'Added!' : 'Add to Cart'}</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={handleBuyNow}
+                      className="py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 transform hover:scale-105 hover:shadow-xl flex items-center justify-center space-x-2"
+                    >
+                      <Zap className="w-5 h-5" />
+                      <span>Buy Now</span>
+                    </button>
+                  </div>
+                )}
                 <p className="text-sm text-gray-600 text-center">
-                  Click to chat with us on WhatsApp for instant ordering and support
+                  {isOutOfStock
+                    ? 'This product is currently unavailable. Please check back later.'
+                    : isInCart(product.id.toString())
+                    ? 'Adjust quantity or proceed to checkout'
+                    : 'Add to cart or buy instantly with just one click'
+                  }
                 </p>
               </div>
 

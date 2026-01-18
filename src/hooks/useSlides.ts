@@ -6,8 +6,8 @@ export const useSlides = () => {
   return useQuery<Slide[], Error>({
     queryKey: ['slides'],
     queryFn: fetchSlides,
-    staleTime: 10 * 60 * 1000, // 10 minutes - slides don't change often
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 };
 
@@ -15,8 +15,8 @@ export const useSlide = (slideId: number) => {
   return useQuery<Slide, Error>({
     queryKey: ['slides', slideId],
     queryFn: () => fetchSlideById(slideId),
-    staleTime: 15 * 60 * 1000, // 15 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
-    enabled: !!slideId, // Only run query if slideId is provided
+    staleTime: 15 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    enabled: !!slideId,
   });
 };
