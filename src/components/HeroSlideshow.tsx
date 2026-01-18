@@ -156,6 +156,7 @@ const HeroSlideshow: React.FC = () => {
                   }`}
                   style={{
                     transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                    objectPosition: 'center 40%',
                   }}
                 />
               </div>

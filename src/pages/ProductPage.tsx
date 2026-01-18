@@ -183,6 +183,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
                   src={product.images[selectedImageIndex]}
                   alt={product.name}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  style={{ objectPosition: 'center 40%' }}
                 />
               </div>
 
@@ -202,6 +203,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ categories }) => {
                       src={image}
                       alt={`${product.name} view ${index + 1}`}
                       className="w-full h-full object-cover"
+                      style={{ objectPosition: 'center 40%' }}
                     />
                   </button>
                 ))}

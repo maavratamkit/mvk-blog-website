@@ -143,7 +143,8 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
         <img
           src={category.image}
           alt={category.title}
-          className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          style={{ objectPosition: 'center 40%' }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
       </div>
