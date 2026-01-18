@@ -138,12 +138,13 @@ interface CategoryCardProps {
 
 const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-2xl group h-96 flex flex-col">
-      <div className="relative h-72 overflow-hidden bg-gray-100">
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-2xl group flex flex-col">
+      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-orange-50 via-red-50 to-orange-100">
         <img
           src={category.image}
           alt={category.title}
-          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          style={{ objectPosition: 'center 40%' }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
       </div>
@@ -154,7 +155,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
         <p className="text-gray-600 mb-6 leading-relaxed flex-1">
           {category.description}
         </p>
-        <Link 
+        <Link
           to={`/category/${slugify(category.title)}`}
           className="block w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg active:scale-95 mt-auto text-center"
         >

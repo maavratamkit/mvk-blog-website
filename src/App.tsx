@@ -9,7 +9,10 @@ import Footer from './components/Footer';
 import AboutPage from './pages/AboutPage';
 import ProductCategoryPage from './pages/ProductCategoryPage';
 import ProductPage from './pages/ProductPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
 import { useCategories } from './hooks/useCategories';
+import { CartProvider } from './contexts/CartContext';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -79,46 +82,64 @@ function App() {
   );
 
   return (
-    <Router>
-      <div className="min-h-screen bg-white">
-        <Routes>
-          <Route 
-            path="/" 
-            element={
-              <>
-                <Header categories={categories} />
-                <HomePage />
-                <Footer />
-              </>
-            } 
-          />
-          <Route 
-            path="/about" 
-            element={
-              <AboutPage 
-                categories={categories}
-              />
-            } 
-          />
-          <Route 
-            path="/category/:categoryName" 
-            element={
-              <ProductCategoryPage 
-                categories={categories}
-              />
-            } 
-          />
-          <Route 
-            path="/product/:productId" 
-            element={
-              <ProductPage 
-                categories={categories}
-              />
-            } 
-          />
-        </Routes>
-      </div>
-    </Router>
+    <CartProvider>
+      <Router>
+        <div className="min-h-screen bg-white">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <>
+                  <Header categories={categories} />
+                  <HomePage />
+                  <Footer />
+                </>
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                <AboutPage
+                  categories={categories}
+                />
+              }
+            />
+            <Route
+              path="/category/:categoryName"
+              element={
+                <ProductCategoryPage
+                  categories={categories}
+                />
+              }
+            />
+            <Route
+              path="/product/:productId"
+              element={
+                <ProductPage
+                  categories={categories}
+                />
+              }
+            />
+            <Route
+              path="/cart"
+              element={
+                <CartPage
+                  categories={categories}
+                />
+              }
+            />
+            <Route
+              path="/checkout"
+              element={
+                <CheckoutPage
+                  categories={categories}
+                />
+              }
+            />
+          </Routes>
+        </div>
+      </Router>
+    </CartProvider>
   );
 }
 
